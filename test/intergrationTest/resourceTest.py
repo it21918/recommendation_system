@@ -2,6 +2,7 @@ import json
 import unittest
 from unittest.mock import patch
 from app import app
+from unittest.mock import Mock
 
 
 class TestCreateUser(unittest.TestCase):
@@ -51,11 +52,8 @@ class TestCreateUser(unittest.TestCase):
         validate_user_schema_mock(self.user_data)
         insert_user_mock(self.user_data)
 
-        insert_user_mock.assert_called_with(self.user_data)
-        insert_user_mock.assert_called_once()
-
-        validate_user_schema_mock.assert_called_with(self.user_data)
-        validate_user_schema_mock.assert_called_once()
+        insert_user_mock.assert_called_once_with(self.user_data)
+        validate_user_schema_mock.assert_called_once_with(self.user_data)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(json.loads(response.data)['message'], 'User created successfully.')
@@ -68,11 +66,8 @@ class TestCreateUser(unittest.TestCase):
         validate_user_schema_mock(self.user_data)
         insert_user_mock(self.user_data)
 
-        insert_user_mock.assert_called_with(self.user_data)
-        insert_user_mock.assert_called_once()
-
-        validate_user_schema_mock.assert_called_with(self.user_data)
-        validate_user_schema_mock.assert_called_once()
+        insert_user_mock.assert_called_assert_called_once_withwith(self.user_data)
+        validate_user_schema_mock.assert_called_once_with(self.user_data)
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(json.loads(response.data)['error']['user_id'][0], 'Missing data for required field.')
@@ -85,11 +80,8 @@ class TestCreateUser(unittest.TestCase):
         insert_event_mock(self.event_data)
         validate_event_schema_mock(self.event_data)
 
-        insert_event_mock.assert_called_with(self.event_data)
-        insert_event_mock.assert_called_once()
-
-        validate_event_schema_mock.assert_called_with(self.event_data)
-        validate_event_schema_mock.assert_called_once()
+        insert_event_mock.assert_called_once_with(self.event_data)
+        validate_event_schema_mock.assert_called_once_with(self.event_data)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(json.loads(response.data)['message'], 'Event created successfully.')
@@ -102,11 +94,8 @@ class TestCreateUser(unittest.TestCase):
         insert_event_mock(self.event_data)
         validate_event_schema_mock(self.event_data)
 
-        insert_event_mock.assert_called_with(self.event_data)
-        insert_event_mock.assert_called_once()
-
-        validate_event_schema_mock.assert_called_with(self.event_data)
-        validate_event_schema_mock.assert_called_once()
+        insert_event_mock.assert_called_once_with(self.event_data)
+        validate_event_schema_mock.assert_called_once_with(self.event_data)
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(json.loads(response.data)['error']['event_id'][0], 'Missing data for required field.')
