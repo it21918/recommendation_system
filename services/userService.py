@@ -42,6 +42,7 @@ def insert_user(user):
 
     # Insert the user's friends into the friends table
     for friend in user['friends']:
+        print(friend)
         cur.execute('INSERT INTO friends (user_username, friend_username) '
                     'VALUES (%s, %s);', (user['username'], friend))
 
