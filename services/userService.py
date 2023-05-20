@@ -1,15 +1,38 @@
 import psycopg2
 from flask import jsonify
 
-# Connect to the database
-def get_db_connection():
-    conn = psycopg2.connect(host='localhost', database='mydb', user="postgres", password="postgres")
-    return conn
+
+class DatabaseConnection:
+    __instance = None
+
+    @staticmethod
+    def get_instance():
+        """ Static method to get the singleton instance """
+        if DatabaseConnection.__instance is None:
+            DatabaseConnection()
+            createUserTable()
+        return DatabaseConnection.__instance
+
+    def __init__(self):
+        """ Private constructor """
+        if DatabaseConnection.__instance is not None:
+            raise Exception("This class is a singleton!")
+        else:
+            self.__conn = self.__connect()
+            DatabaseConnection.__instance = self
+
+    def __connect(self):
+        """ Connect to the database """
+        conn = psycopg2.connect(host='localhost', database='mydb', user="postgres", password="postgres")
+        return conn
+
+    def get_connection(self):
+        """ Get the database connection """
+        return self.__conn
 
 
 def createUserTable():
-    # Open a cursor to perform database operations
-    conn = get_db_connection()
+    conn = DatabaseConnection.get_instance().get_connection()
     cur = conn.cursor()
 
     # Execute a command: this creates a new table
@@ -28,12 +51,10 @@ def createUserTable():
 
     conn.commit()
     cur.close()
-    conn.close()
 
 
 def insert_user(user):
-    createUserTable()
-    conn = get_db_connection()
+    conn = DatabaseConnection.get_instance().get_connection()
     cur = conn.cursor()
 
     # Insert the user data into the user table
@@ -48,12 +69,10 @@ def insert_user(user):
 
     conn.commit()
     cur.close()
-    conn.close()
 
 
 def delete_user(username):
-    createUserTable()
-    conn = get_db_connection()
+    conn = DatabaseConnection.get_instance().get_connection()
     cur = conn.cursor()
 
     # Delete the user with the given username from the user table
@@ -61,12 +80,10 @@ def delete_user(username):
 
     conn.commit()
     cur.close()
-    conn.close()
 
 
 def get_user(username):
-    createUserTable()
-    conn = get_db_connection()
+    conn = DatabaseConnection.get_instance().get_connection()
     cur = conn.cursor()
 
     # Retrieve the user with the given username from the user table
@@ -75,7 +92,6 @@ def get_user(username):
 
     if not row:
         cur.close()
-        conn.close()
         return jsonify({'error': 'User not found'}), 404
 
     user = {
@@ -87,21 +103,9 @@ def get_user(username):
         "friends": []
     }
 
-    # Retrieve the user's friends from the friend table
-    cur.execute('''SELECT friend_username FROM friends WHERE user_username=%s''', (row[0],))
-    friend_rows = cur.fetchall()
-    for friend_row in friend_rows:
-        user["friends"].append(friend_row[0])
-
-    cur.close()
-    conn.close()
-
-    return user
-
 
 def get_all_users():
-    createUserTable()
-    conn = get_db_connection()
+    conn = DatabaseConnection.get_instance().get_connection()
     cur = conn.cursor()
 
     # Retrieve the user with the given username from the user table
@@ -128,6 +132,5 @@ def get_all_users():
         users.append(user)
 
     cur.close()
-    conn.close()
 
     return users

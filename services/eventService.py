@@ -1,6 +1,33 @@
 import psycopg2
 
 
+class DatabaseConnection:
+    __instance = None
+
+    @staticmethod
+    def get_instance():
+        if DatabaseConnection.__instance is None:
+            DatabaseConnection()
+            createEventTable()
+        return DatabaseConnection.__instance
+
+    def __init__(self):
+        if DatabaseConnection.__instance is not None:
+            raise Exception("This class is a singleton!")
+        else:
+            self.__conn = self.__create_connection()
+            DatabaseConnection.__instance = self
+
+    def __create_connection(self):
+        return psycopg2.connect(host='localhost',
+                                database='mydb',
+                                user="postgres",
+                                password="postgres")
+
+    def get_connection(self):
+        return self.__conn
+
+
 # Connect to the database
 def get_db_connection():
     conn = psycopg2.connect(host='localhost',
@@ -11,8 +38,7 @@ def get_db_connection():
 
 
 def createEventTable():
-    # Open a cursor to perform database operations
-    conn = get_db_connection()
+    conn = DatabaseConnection.get_instance().get_connection()
     cur = conn.cursor()
 
     # Execute a command: this creates a new table
@@ -33,12 +59,10 @@ def createEventTable():
 
     conn.commit()
     cur.close()
-    conn.close()
 
 
 def insert_event(event):
-    createEventTable()
-    conn = get_db_connection()
+    conn = DatabaseConnection.get_instance().get_connection()
     cur = conn.cursor()
 
     # Insert the event data into the events table
@@ -55,12 +79,10 @@ def insert_event(event):
         conn.commit()
 
     cur.close()
-    conn.close()
 
 
 def delete_event(id):
-    createEventTable()
-    conn = get_db_connection()
+    conn = DatabaseConnection.get_instance().get_connection()
     cur = conn.cursor()
 
     # Delete the user with the given username from the user table
@@ -68,12 +90,10 @@ def delete_event(id):
 
     conn.commit()
     cur.close()
-    conn.close()
 
 
 def get_event(id):
-    createEventTable()
-    conn = get_db_connection()
+    conn = DatabaseConnection.get_instance().get_connection()
     cur = conn.cursor()
 
     # Retrieve the user with the given username from the user table
@@ -81,14 +101,12 @@ def get_event(id):
     user = cur.fetchone()
 
     cur.close()
-    conn.close()
 
     return user
 
 
 def get_all_events():
-    createEventTable()
-    conn = get_db_connection()
+    conn = DatabaseConnection.get_instance().get_connection()
     cur = conn.cursor()
 
     # Retrieve all events from the events table
@@ -117,6 +135,5 @@ def get_all_events():
         events.append(event)
 
     cur.close()
-    conn.close()
 
     return events

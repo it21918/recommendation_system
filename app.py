@@ -1,13 +1,12 @@
 from flask import Flask, request, jsonify
 
 from recommendation import recommend_events_based_on_similarity, recommend_coupons_based_on_friends
-from services.couponService import insert_coupon, get_friends_coupons
+from services.couponService import get_friends_coupons
 from services.eventService import insert_event, get_all_events
 from services.userService import insert_user, get_user
 from validator import validate_user_schema, validate_event_schema, validate_coupon_schema
 
 app = Flask(__name__)
-
 
 @app.route('/create_user', methods=['POST'])
 def create_user():
@@ -30,6 +29,19 @@ def create_user():
         # If there are any errors, return an error response with the error message
         return jsonify({'error': str(e)}), 500
 
+@app.route('/users', methods=['GET'])
+def get_users():
+    """Function to get users"""
+    try:
+        # Query the users collection to retrieve all users
+        users = get_users()
+
+        # Return the users as a JSON response
+        return jsonify({'users': users})
+
+    except Exception as e:
+        # If there are any errors, return an error response with the error message
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/create_event', methods=['POST'])
 def create_event():
@@ -55,6 +67,34 @@ def create_event():
         # If there is any error, return an error response with the error message
         return jsonify({'error': str(err)}), 500
 
+@app.route('/events', methods=['GET'])
+def get_users():
+    """Function to get events"""
+    try:
+        # Query the users collection to retrieve all events
+        events = get_all_events()
+
+        # Return the users as a JSON response
+        return jsonify({'events': events})
+
+    except Exception as e:
+        # If there are any errors, return an error response with the error message
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/coupons', methods=['GET'])
+def get_coupons():
+    """Function to get coupons"""
+    try:
+        # Retrieve the coupons from the database
+        coupons = get_coupons()
+
+        # Return the coupons as a JSON response
+        return jsonify({'coupons': coupons})
+
+    except Exception as e:
+        # If there are any errors, return an error response with the error message
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/recommendations_similarity', methods=['GET'])
 def get_recommendations_based_on_similarity():
@@ -77,9 +117,6 @@ def get_recommendations_based_on_similarity():
 
         if not is_valid:
             return jsonify({'error': message}), 400
-
-        # # Save the coupon to the database
-        insert_coupon(coupon=coupon_data)
 
         # Return the coupon data as JSON
         return jsonify({'recommendation based on similarity': str(coupon_data)}), 200
@@ -107,7 +144,7 @@ def get_recommendations_based_on_friends():
         if not is_valid:
             return jsonify({'error': message}), 400
 
-        insert_coupon(coupon)
+        # insert_coupon(coupon)
         return jsonify("recommendation based on your friends:", str(coupon)), 200
 
     except Exception as err:

@@ -1,6 +1,6 @@
 import time
 import json
-from dataGenerator import generate_user, generate_event
+from dataGenerator import generate_user, generate_event, generate_coupon
 from kafka import KafkaProducer
 
 
@@ -21,6 +21,7 @@ if __name__ == '__main__':
     while True:
         producer.send('user', generate_user())
         producer.send('event', generate_event())
+        producer.send('coupon', generate_coupon())
 
         # Sleep for two hours
         time_to_sleep = 3600 * 1000
