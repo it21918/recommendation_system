@@ -1,9 +1,9 @@
 from flask import Flask, request, jsonify
 
 from recommendation import recommend_events_based_on_similarity, recommend_coupons_based_on_friends
-from services.couponService import get_friends_coupons
+from services.couponService import get_friends_coupons, get_all_coupons
 from services.eventService import insert_event, get_all_events
-from services.userService import insert_user, get_user
+from services.userService import insert_user, get_user, get_all_users
 from validator import validate_user_schema, validate_event_schema, validate_coupon_schema
 
 app = Flask(__name__)
@@ -34,7 +34,7 @@ def get_users():
     """Function to get users"""
     try:
         # Query the users collection to retrieve all users
-        users = get_users()
+        users = get_all_users()
 
         # Return the users as a JSON response
         return jsonify({'users': users})
@@ -87,7 +87,7 @@ def get_coupons():
     """Function to get coupons"""
     try:
         # Retrieve the coupons from the database
-        coupons = get_coupons()
+        coupons = get_all_coupons()
 
         # Return the coupons as a JSON response
         return jsonify({'coupons': coupons})
@@ -128,13 +128,17 @@ def get_recommendations_based_on_similarity():
 
 @app.route('/recommendations_friends', methods=['GET'])
 def get_recommendations_based_on_friends():
-    """ function to return the coupon's on user friends """
+    """Function to return the coupons based on user's friends"""
 
     try:
         # Get the user's friends' IDs
         username = request.args.get('username')
         user = get_user(username)
-        friend_coupons = get_friends_coupons(user['friends'])
+
+        # Extract the friends' usernames from the user dictionary
+        friend_usernames = user.get('friends', [])  # Assuming 'friends' is a list of usernames
+
+        friend_coupons = get_friends_coupons(friend_usernames)
 
         coupon = recommend_coupons_based_on_friends(friend_coupons, user)
 
@@ -145,10 +149,10 @@ def get_recommendations_based_on_friends():
             return jsonify({'error': message}), 400
 
         # insert_coupon(coupon)
-        return jsonify("recommendation based on your friends:", str(coupon)), 200
+        return jsonify({"recommendation based on your friends": coupon}), 200
 
     except Exception as err:
-        # If there is any error, return an error re
+        # If there is any error, return an error response with the error message
         return jsonify({'error': str(err)}), 500
 
 

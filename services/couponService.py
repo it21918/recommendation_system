@@ -65,7 +65,7 @@ def insert_coupon(coupon):
 
     cur.close()
 
-def get_coupons():
+def get_all_coupons():
     """Function to retrieve all coupons"""
     conn = DatabaseConnection.get_instance().get_connection()
     cur = conn.cursor()
