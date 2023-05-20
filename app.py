@@ -68,7 +68,7 @@ def create_event():
         return jsonify({'error': str(err)}), 500
 
 @app.route('/events', methods=['GET'])
-def get_users():
+def get_events():
     """Function to get events"""
     try:
         # Query the users collection to retrieve all events
