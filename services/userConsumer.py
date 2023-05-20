@@ -4,6 +4,7 @@ import threading
 from kafka import KafkaConsumer
 from userService import insert_user
 from eventService import DatabaseConnection
+from validator import validate_user_schema
 
 user_count = 0  # Global variable for user count
 user_count_lock = threading.Lock()  # Lock to synchronize access to user_count
@@ -16,6 +17,7 @@ def save_users(consumerOfUsers):
     for message in consumerOfUsers:
         data = json.loads(message.value)
         print(data)
+        validate_user_schema(data)
         insert_user(data)
 
         with user_count_lock:
