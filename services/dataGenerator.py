@@ -4,6 +4,7 @@ import datetime
 from userService import get_all_users
 from eventService import get_all_events
 
+
 def generate_user():
     """Generates a random user based on the UserSchema."""
 
@@ -46,8 +47,11 @@ def generate_event():
         "participants": participants
     }
 
+
 def generate_coupon():
     users = get_all_users()
+    if len(users) == 0:
+        return
     events = get_all_events()
 
     user = random.choice(users)

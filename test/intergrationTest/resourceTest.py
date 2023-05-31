@@ -2,7 +2,6 @@ import json
 import unittest
 from unittest.mock import patch
 from app import app
-from unittest.mock import Mock
 
 
 class TestCreateUser(unittest.TestCase):
