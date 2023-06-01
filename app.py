@@ -1,12 +1,39 @@
 from flask import Flask, request, jsonify
 
-from recommendation import recommend_events_based_on_similarity, recommend_coupons_based_on_friends
+from recommendation import recommend_events_based_on_similarity, recommend_coupons_based_on_friends, popularEvents, recommend_coupon_from_popular_coupons
 from services.couponService import get_friends_coupons, get_all_coupons
-from services.eventService import insert_event, get_all_events
+from services.eventService import insert_event, get_all_events, get_event
 from services.userService import insert_user, get_user, get_all_users
 from validator import validate_user_schema, validate_event_schema, validate_coupon_schema
 
 app = Flask(__name__)
+
+
+@app.route('/graph', methods=['GET'])
+def get_graph_recommendation():
+    try:
+        username = request.args.get('username')
+        user = get_user(username)
+        limit = request.args.get('limit')
+        limit = int(limit) if limit is not None else None
+
+        # Get all events from the events collection
+        all_coupons = get_all_coupons()
+        events = []
+        # Get the recommended events for the user
+        event_ids = popularEvents(coupons=all_coupons)
+
+        for id in event_ids:
+            events.append(get_event(id))
+
+        coupon_data = recommend_coupon_from_popular_coupons(events, limit, user=user)
+        # Return the coupon data as JSON
+        return jsonify({'recommendation based on similarity': str(coupon_data)}), 200
+
+    except Exception as err:
+        # If there is any error, return an error response
+        return jsonify({'error': str(err)}), 500
+
 
 @app.route('/create_user', methods=['POST'])
 def create_user():
@@ -29,6 +56,7 @@ def create_user():
         # If there are any errors, return an error response with the error message
         return jsonify({'error': str(e)}), 500
 
+
 @app.route('/users', methods=['GET'])
 def get_users():
     """Function to get users"""
@@ -42,6 +70,7 @@ def get_users():
     except Exception as e:
         # If there are any errors, return an error response with the error message
         return jsonify({'error': str(e)}), 500
+
 
 @app.route('/create_event', methods=['POST'])
 def create_event():
@@ -66,6 +95,7 @@ def create_event():
     except Exception as err:
         # If there is any error, return an error response with the error message
         return jsonify({'error': str(err)}), 500
+
 
 @app.route('/events', methods=['GET'])
 def get_events():
@@ -95,6 +125,7 @@ def get_coupons():
     except Exception as e:
         # If there are any errors, return an error response with the error message
         return jsonify({'error': str(e)}), 500
+
 
 @app.route('/recommendations_similarity', methods=['GET'])
 def get_recommendations_based_on_similarity():

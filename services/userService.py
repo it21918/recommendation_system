@@ -102,6 +102,8 @@ def get_user(username):
         "registration_date": row[4],
         "friends": []
     }
+    cur.close()
+    return user
 
 
 def get_all_users():

@@ -1,3 +1,6 @@
+import networkx as nx
+
+
 def recommend_events_based_on_similarity(all_events, user, limit: int = 1):
     # Calculate the similarity score between the user and each event
     event_scores = []
@@ -39,3 +42,47 @@ def recommend_coupons_based_on_friends(friend_coupons, user):
     coupon = {'selections': selections, 'username': user['username']}
 
     return coupon
+
+
+def popularEvents(coupons):
+    G = nx.Graph()
+
+    for i, coupon in enumerate(coupons):
+        selections = coupon.get("selections", [])
+        for j in range(len(selections)):
+            event_id = selections[j].get("event_id")
+
+            if not G.has_node(event_id):  # Check if node exists in the graph
+                G.add_node(event_id)  # Add event as a node in the graph
+
+            # Create edges between events from the same coupon
+            for k in range(j + 1, len(selections)):
+                other_event_id = selections[k].get("event_id")
+                if event_id != other_event_id and not G.has_edge(event_id,
+                                                                 other_event_id):  # Check if edge already exists
+                    G.add_edge(event_id, other_event_id)
+
+            # Create edges between events from different coupons
+            for other_coupon in coupons[i + 1:]:
+                other_selections = other_coupon.get("selections", [])
+                for other_selection in other_selections:
+                    other_event_id = other_selection.get("event_id")
+                    if event_id != other_event_id and not G.has_edge(event_id,
+                                                                     other_event_id):  # Check if edge already exists
+                        G.add_edge(event_id, other_event_id)
+
+    # Perform graph analysis to determine popularity
+    # Example: Calculate degree centrality for each node
+    degree_centrality = nx.degree_centrality(G)
+
+    # Sort events based on degree centrality to find popular ones
+    popular_events = sorted(degree_centrality, key=degree_centrality.get, reverse=True)
+
+    return popular_events
+
+
+def recommend_coupon_from_popular_coupons(events, limit, user):
+    return {
+        'selections': events[:limit],
+        'username': user['username']
+    }

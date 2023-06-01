@@ -5,3 +5,4 @@ kafka-python
 pip
 setuptools
 MyApplication~=0.1.0
+networkx
