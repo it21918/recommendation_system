@@ -48,7 +48,7 @@ def createGraph(coupons):
 
     for coupon in coupons:
         for event in coupon['selections']:
-            G.add_node(str(event["event_id"]))
+            G.add_node(event["event_id"])
 
     return G
 

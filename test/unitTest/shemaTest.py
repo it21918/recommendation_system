@@ -98,3 +98,7 @@ class TestSchema(unittest.TestCase):
     def test_user_schema_validation(self):
         assert validate_user_schema(self.valid_user) == (True, "User schema is valid.")
         assert validate_user_schema(self.invalid_user) == (False, "'1990' is not of type 'integer'")
+
+
+if __name__ == '__main__':
+    unittest.main()

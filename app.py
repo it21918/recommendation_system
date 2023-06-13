@@ -29,11 +29,9 @@ def get_graph_recommendation():
             events.append(get_event(id))
 
         coupon_data = recommend_coupon_from_popular_coupons(events, limit, user=user)
-        # Return the coupon data as JSON
         return jsonify({'recommendation based on popularity of events': str(coupon_data)}), 200
 
     except Exception as err:
-        # If there is any error, return an error response
         return jsonify({'error': str(err)}), 500
 
 

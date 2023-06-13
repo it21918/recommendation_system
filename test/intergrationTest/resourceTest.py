@@ -49,7 +49,7 @@ class TestCreateUser(unittest.TestCase):
         response = self.app.post('/create_user', json=self.user_data)
 
         validate_user_schema_mock.assert_called_once_with(self.user_data)
-        insert_user_mock.assert_called_once_with(self.user_data)
+        insert_user_mock.assert_called_once_with(user=self.user_data)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(json.loads(response.data)['message'], 'User created successfully.')
