@@ -48,11 +48,8 @@ class TestCreateUser(unittest.TestCase):
     def test_create_user(self, insert_user_mock, validate_user_schema_mock):
         response = self.app.post('/create_user', json=self.user_data)
 
-        validate_user_schema_mock(self.user_data)
-        insert_user_mock(self.user_data)
-
-        insert_user_mock.assert_called_once_with(self.user_data)
         validate_user_schema_mock.assert_called_once_with(self.user_data)
+        insert_user_mock.assert_called_once_with(self.user_data)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(json.loads(response.data)['message'], 'User created successfully.')
@@ -62,25 +59,19 @@ class TestCreateUser(unittest.TestCase):
     def test_create_user_missing_data(self, insert_user_mock, validate_user_schema_mock):
         response = self.app.post('/create_user', json=self.user_data_failure)
 
-        validate_user_schema_mock(self.user_data)
-        insert_user_mock(self.user_data)
-
-        insert_user_mock.assert_called_assert_called_once_withwith(self.user_data)
-        validate_user_schema_mock.assert_called_once_with(self.user_data)
+        validate_user_schema_mock.assert_called_once_with(self.user_data_failure)
+        insert_user_mock.assert_not_called()
 
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(json.loads(response.data)['error']['user_id'][0], 'Missing data for required field.')
+        self.assertEqual(json.loads(response.data)['error']['username'][0], 'Missing data for required field.')
 
     @patch('services.eventService.insert_event')
     @patch('validator.validate_event_schema')
     def test_create_event(self, insert_event_mock, validate_event_schema_mock):
         response = self.app.post('/create_event', json=self.event_data)
 
-        insert_event_mock(self.event_data)
-        validate_event_schema_mock(self.event_data)
-
-        insert_event_mock.assert_called_once_with(self.event_data)
         validate_event_schema_mock.assert_called_once_with(self.event_data)
+        insert_event_mock.assert_called_once_with(self.event_data)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(json.loads(response.data)['message'], 'Event created successfully.')
@@ -90,22 +81,22 @@ class TestCreateUser(unittest.TestCase):
     def test_create_event_missing_data(self, insert_event_mock, validate_event_schema_mock):
         response = self.app.post('/create_event', json=self.event_data_failure)
 
-        insert_event_mock(self.event_data)
-        validate_event_schema_mock(self.event_data)
-
-        insert_event_mock.assert_called_once_with(self.event_data)
-        validate_event_schema_mock.assert_called_once_with(self.event_data)
+        validate_event_schema_mock.assert_called_once_with(self.event_data_failure)
+        insert_event_mock.assert_not_called()
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(json.loads(response.data)['error']['event_id'][0], 'Missing data for required field.')
 
     def test_get_recommendations_based_on_similarity(self):
         response = self.app.get('/recommendations_similarity/testUser')
-        assert response.status_code == 200
-        assert 'recommendation based on similarity' in response.json
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('recommendation based on similarity', response.json)
 
     def test_get_recommendations_based_on_friends(self):
         response = self.app.get('/recommendations_friends/testUser')
-        assert response.status_code == 200
-        assert 'recommendation based on your friends:' in response.json
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('recommendation based on your friends:', response.json)
 
+
+if __name__ == "__main__":
+    unittest.main()

@@ -1,6 +1,6 @@
 import unittest
 
-from validator import validate_coupon_schema, validate_event_schema, validate_user_schema
+from services.validator import validate_coupon_schema, validate_event_schema, validate_user_schema
 
 
 class TestSchema(unittest.TestCase):

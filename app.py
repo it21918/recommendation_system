@@ -4,7 +4,7 @@ from recommendation import recommend_events_based_on_similarity, recommend_coupo
 from services.couponService import get_friends_coupons, get_all_coupons
 from services.eventService import insert_event, get_all_events, get_event
 from services.userService import insert_user, get_user, get_all_users
-from validator import validate_user_schema, validate_event_schema, validate_coupon_schema
+from services.validator import validate_user_schema, validate_event_schema, validate_coupon_schema
 
 app = Flask(__name__)
 
@@ -12,6 +12,8 @@ app = Flask(__name__)
 @app.route('/graph', methods=['GET'])
 def get_graph_recommendation():
     try:
+        """Function to get coupon based on popular events"""
+
         username = request.args.get('username')
         user = get_user(username)
         limit = request.args.get('limit')
@@ -28,7 +30,7 @@ def get_graph_recommendation():
 
         coupon_data = recommend_coupon_from_popular_coupons(events, limit, user=user)
         # Return the coupon data as JSON
-        return jsonify({'recommendation based on similarity': str(coupon_data)}), 200
+        return jsonify({'recommendation based on popularity of events': str(coupon_data)}), 200
 
     except Exception as err:
         # If there is any error, return an error response

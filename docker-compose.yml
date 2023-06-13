@@ -12,6 +12,8 @@ services:
       - dbdata:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    networks:
+      - recommendation_network
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.3.2
@@ -19,6 +21,8 @@ services:
     environment:
       - ZOOKEEPER_CLIENT_PORT=2181
       - ZOOKEEPER_TICK_TIME=2000
+    networks:
+      - recommendation_network
 
   broker:
     image: confluentinc/cp-kafka:7.3.2
@@ -35,6 +39,8 @@ services:
       - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
       - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1
       - KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
+    networks:
+      - recommendation_network
 
   app:
     build: .
@@ -50,6 +56,59 @@ services:
       - KAFKA_TOPIC=${KAFKA_TOPIC}
       - APP_HOST=${APP_HOST}
       - APP_PORT=${APP_PORT}
+    networks:
+      - recommendation_network
+
+  eventconsumer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - broker
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=broker:9092
+      - KAFKA_TOPIC=event
+    networks:
+      - recommendation_network
+
+  userconsumer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - broker
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=broker:9092
+      - KAFKA_TOPIC=user
+    networks:
+      - recommendation_network
+
+  couponconsumer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - broker
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=broker:9092
+      - KAFKA_TOPIC=coupon
+    networks:
+      - recommendation_network
+
+  producer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - broker
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=broker:9092
+    networks:
+      - recommendation_network
+
+networks:
+  recommendation_network:
+    driver: bridge
 
 volumes:
   dbdata:

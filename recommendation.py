@@ -43,9 +43,17 @@ def recommend_coupons_based_on_friends(friend_coupons, user):
 
     return coupon
 
+def createGraph(coupons):
+    G = nx.Graph()
+
+    for coupon in coupons:
+        for event in coupon['selections']:
+            G.add_node(str(event["event_id"]))
+
+    return G
 
 def popularEvents(coupons):
-    G = nx.Graph()
+    G = createGraph(coupons)
 
     for i, coupon in enumerate(coupons):
         selections = coupon.get("selections", [])
@@ -72,7 +80,7 @@ def popularEvents(coupons):
                         G.add_edge(event_id, other_event_id)
 
     # Perform graph analysis to determine popularity
-    # Example: Calculate degree centrality for each node
+    # Calculate degree centrality for each node
     degree_centrality = nx.degree_centrality(G)
 
     # Sort events based on degree centrality to find popular ones

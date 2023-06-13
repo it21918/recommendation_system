@@ -1,6 +1,7 @@
 import json
 import multiprocessing
 from kafka import KafkaConsumer, TopicPartition
+from validator import validate_event_schema
 from eventService import insert_event, DatabaseConnection
 
 event_count = 0  # Global variable for event count
@@ -13,6 +14,7 @@ def save_events(consumer):
     for message in consumer:
         data = json.loads(message.value)
         print(data)
+        validate_event_schema(data)
         insert_event(data)
         with event_count_lock:
             event_count += 1

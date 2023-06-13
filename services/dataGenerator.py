@@ -1,8 +1,12 @@
 import random
 import string
 import datetime
+
+import networkx as nx
+
 from userService import get_all_users
 from eventService import get_all_events
+from couponService import get_all_coupons
 
 
 def generate_user():
@@ -93,3 +97,4 @@ def generate_coupon(num_events=3):
     else:
         print("error trying again")
         return generate_coupon()
+
