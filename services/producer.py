@@ -43,16 +43,20 @@ producer = KafkaProducer(
 )
 
 if __name__ == '__main__':
-    counter = 0
+    try:
+        counter = random.randint(0, 9)
 
-    # Infinite loop - runs until you kill the program
-    while True:
-        print(str(counter).encode('utf-8'))
-        producer.send(topic='user', value=generate_user(), key=str(counter).encode('utf-8'))
-        producer.send(topic='event', value=generate_event(), key=str(counter).encode('utf-8'))
-        producer.send(topic='coupon', value=generate_coupon(), key=str(counter).encode('utf-8'))
-        counter = counter + 1
+        # Infinite loop - runs until you kill the program
+        while True:
+            print(str(counter).encode('utf-8'))
+            producer.send(topic='user', value=generate_user(), key=str(counter).encode('utf-8'))
+            producer.send(topic='event', value=generate_event(), key=str(counter).encode('utf-8'))
+            producer.send(topic='coupon', value=generate_coupon(), key=str(counter).encode('utf-8'))
+            counter = counter + 1
 
-        # Sleep for 10sec
-        time_to_sleep = 10
-        time.sleep(time_to_sleep)
+            # Sleep for 10sec
+            time_to_sleep = 10
+            time.sleep(time_to_sleep)
+    except KeyboardInterrupt:
+        print('Shutting down...')
+        producer.close()
