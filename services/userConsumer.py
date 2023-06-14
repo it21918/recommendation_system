@@ -33,38 +33,45 @@ if __name__ == '__main__':
     partitions345 = [3, 4, 5]
     partitions6789 = [6, 7, 8, 9]
 
-    consumer_of_users012 = KafkaConsumer(
-        bootstrap_servers='localhost:9092',
-        auto_offset_reset='latest',
-        key_deserializer=lambda key: key.decode('utf-8')
-    )
-    consumer_of_users345 = KafkaConsumer(
-        bootstrap_servers='localhost:9092',
-        auto_offset_reset='latest',
-        key_deserializer=lambda key: key.decode('utf-8')
-    )
-    consumer_of_users6789 = KafkaConsumer(
-        bootstrap_servers='localhost:9092',
-        auto_offset_reset='latest',
-        key_deserializer=lambda key: key.decode('utf-8')
-    )
+    processes = []
 
-    # Assign the specified partitions to the consumers
-    consumer_of_users012.assign([TopicPartition("user", p) for p in partitions012])
-    consumer_of_users345.assign([TopicPartition("user", p) for p in partitions345])
-    consumer_of_users6789.assign([TopicPartition("user", p) for p in partitions6789])
+    try:
+        consumer_of_users012 = KafkaConsumer(
+            bootstrap_servers='localhost:9092',
+            auto_offset_reset='latest',
+            key_deserializer=lambda key: key.decode('utf-8')
+        )
+        consumer_of_users345 = KafkaConsumer(
+            bootstrap_servers='localhost:9092',
+            auto_offset_reset='latest',
+            key_deserializer=lambda key: key.decode('utf-8')
+        )
+        consumer_of_users6789 = KafkaConsumer(
+            bootstrap_servers='localhost:9092',
+            auto_offset_reset='latest',
+            key_deserializer=lambda key: key.decode('utf-8')
+        )
 
-    # Create separate processes for each consumer
-    process012 = multiprocessing.Process(target=save_users, args=(consumer_of_users012,))
-    process345 = multiprocessing.Process(target=save_users, args=(consumer_of_users345,))
-    process6789 = multiprocessing.Process(target=save_users, args=(consumer_of_users6789,))
+        # Assign the specified partitions to the consumers
+        consumer_of_users012.assign([TopicPartition("coupon", p) for p in partitions012])
+        consumer_of_users345.assign([TopicPartition("coupon", p) for p in partitions345])
+        consumer_of_users6789.assign([TopicPartition("coupon", p) for p in partitions6789])
 
-    # Start the processes
-    process012.start()
-    process345.start()
-    process6789.start()
+        processes.append(multiprocessing.Process(target=save_users, args=(consumer_of_users012,)))
+        processes.append(multiprocessing.Process(target=save_users, args=(consumer_of_users345,)))
+        processes.append(multiprocessing.Process(target=save_users(), args=(consumer_of_users6789,)))
 
-    # Wait for the processes to finish
-    process012.join()
-    process345.join()
-    process6789.join()
+        # Start the processes
+        for process in processes:
+            process.start()
+
+        # Wait for the processes to finish
+        for process in processes:
+            process.join()
+
+    except KeyboardInterrupt:
+        print('Shutting down...')
+        for process in processes:
+            process.terminate()
+
+        DatabaseConnection.get_instance().get_connection().close()
