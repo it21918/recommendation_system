@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 
-from recommendation import recommend_events_based_on_similarity, recommend_coupons_based_on_friends, popularEvents, recommend_coupon_from_popular_coupons
-from services.couponService import get_friends_coupons, get_all_coupons
+from recommendation import recommend_events_based_on_similarity, recommend_coupons_based_on_friends, findSimilarCoupons
+from services.couponService import get_friends_coupons, get_all_coupons, get_coupon, get_all_user_coupons
 from services.eventService import insert_event, get_all_events, get_event
 from services.userService import insert_user, get_user, get_all_users
 from services.validator import validate_user_schema, validate_event_schema, validate_coupon_schema
@@ -10,26 +10,25 @@ app = Flask(__name__)
 
 
 @app.route('/graph', methods=['GET'])
-def get_graph_recommendation():
+def get_recommendation_coupon_similarity():
     try:
-        """Function to get coupon based on popular events"""
+        """Function to get recommended coupons. This method gets user's most recent coupon
+        and tries to find similarities with other coupons and then returns the coupons
+        with highest similarity"""
 
+        neighbor_coupons = []
         username = request.args.get('username')
-        user = get_user(username)
-        limit = request.args.get('limit')
-        limit = int(limit) if limit is not None else None
+        user_recent_coupons = get_all_user_coupons(username)
 
-        # Get all events from the events collection
-        all_coupons = get_all_coupons()
-        events = []
-        # Get the recommended events for the user
-        event_ids = popularEvents(coupons=all_coupons)
+        if user_recent_coupons:
+            user_recent_coupon = user_recent_coupons[0]
+            all_coupons = get_all_coupons()
+            similar_coupons = findSimilarCoupons(coupons=all_coupons, coupon_id=user_recent_coupon['coupon_id'])
 
-        for id in event_ids:
-            events.append(get_event(id))
+            for id in similar_coupons:
+                neighbor_coupons.append(get_coupon(id))
 
-        coupon_data = recommend_coupon_from_popular_coupons(events, limit, user=user)
-        return jsonify({'recommendation based on popularity of events': str(coupon_data)}), 200
+        return jsonify({'recommendation based on similarity of coupons': str(neighbor_coupons)}), 200
 
     except Exception as err:
         return jsonify({'error': str(err)}), 500

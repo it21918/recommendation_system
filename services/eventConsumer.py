@@ -49,9 +49,9 @@ if __name__ == '__main__':
         )
 
         # Assign the specified partitions to the consumers
-        consumer_of_events012.assign([TopicPartition("coupon", p) for p in partitions012])
-        consumer_of_events345.assign([TopicPartition("coupon", p) for p in partitions345])
-        consumer_of_events6789.assign([TopicPartition("coupon", p) for p in partitions6789])
+        consumer_of_events012.assign([TopicPartition("event", p) for p in partitions012])
+        consumer_of_events345.assign([TopicPartition("event", p) for p in partitions345])
+        consumer_of_events6789.assign([TopicPartition("event", p) for p in partitions6789])
 
         processes.append(multiprocessing.Process(target=save_events, args=(consumer_of_events012,)))
         processes.append(multiprocessing.Process(target=save_events, args=(consumer_of_events345,)))

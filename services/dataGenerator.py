@@ -2,12 +2,8 @@ import random
 import string
 import datetime
 
-import networkx as nx
-
 from userService import get_all_users
 from eventService import get_all_events
-from couponService import get_all_coupons
-
 
 def generate_user():
     """Generates a random user based on the UserSchema."""
@@ -61,7 +57,8 @@ def generate_event():
 def generate_coupon(num_events=3):
     users = get_all_users()
     if len(users) == 0:
-        return
+        print(users)
+        return -1
     events = get_all_events()
 
     user = random.choice(users)
@@ -71,7 +68,8 @@ def generate_coupon(num_events=3):
 
     coupon = {
         "username": user["username"],
-        "selections": []
+        "selections": [],
+        "created_date": (datetime.datetime.utcnow() + datetime.timedelta(days=random.randint(1, 30))).isoformat()
     }
 
     for event in selected_events:
