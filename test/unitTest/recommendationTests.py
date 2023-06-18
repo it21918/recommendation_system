@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 
-from recommendation import recommend_events_based_on_similarity, popularEvents, recommend_coupon_from_popular_coupons
+from recommendation import recommend_events_based_on_similarity, findSimilarCoupons
 from recommendation import recommend_coupons_based_on_friends
 
 
@@ -75,47 +75,6 @@ class TestRecommendationMethods(unittest.TestCase):
         self.assertIn({'event_id': 2, 'odds': 7}, recommended_coupon['selections'])
         self.assertIn({'event_id': 3, 'odds': 8}, recommended_coupon['selections'])
         self.assertIn({'event_id': 4, 'odds': 9}, recommended_coupon['selections'])
-
-    def test_popularEvents(self):
-        coupons = [
-            {
-                "selections": [
-                    {"event_id": 1, "odds": 80},
-                    {"event_id": 2, "odds": 60},
-                    {"event_id": 3, "odds": 70}
-                ]
-            },
-            {
-                "selections": [
-                    {"event_id": 2, "odds": 90},
-                    {"event_id": 1, "odds": 75},
-                    {"event_id": 5, "odds": 85}
-                ]
-            },
-            {
-                "selections": [
-                    {"event_id": 1, "odds": 95},
-                ]
-            }
-        ]
-
-        popular_events = popularEvents(coupons)
-
-        expected_result = [1,2,3,5]
-        self.assertEqual(popular_events, expected_result)
-
-    def test_recommend_coupon_from_popular_coupons(self):
-        events = [2, 1, 3, 5, 4]
-        limit = 3
-        user = {"username": "test_user"}
-
-        recommended_coupon = recommend_coupon_from_popular_coupons(events, limit, user)
-
-        expected_result = {
-            "selections": [2, 1, 3],
-            "username": "test_user"
-        }
-        self.assertEqual(recommended_coupon, expected_result)
 
 
 if __name__ == '__main__':

@@ -1,3 +1,5 @@
+import datetime
+
 import networkx as nx
 
 
@@ -22,7 +24,8 @@ def recommend_events_based_on_similarity(all_events, user, limit: int = 1):
     for event, score in event_scores[:limit]:
         selection = {
             'event_id': event['id'],
-            'odds': score / 3 * 100  # Convert the score to a percentage
+            'odds': score / 3 * 100,  # Convert the score to a percentage,
+            'timestamp': datetime.datetime.now()
         }
         selections.append(selection)
 
@@ -43,54 +46,46 @@ def recommend_coupons_based_on_friends(friend_coupons, user):
 
     return coupon
 
+
 def createGraph(coupons):
     G = nx.Graph()
 
     for coupon in coupons:
-        for event in coupon['selections']:
-            G.add_node(event["event_id"])
+        G.add_node(coupon['coupon_id'], selections=coupon['selections'])
 
     return G
 
-def popularEvents(coupons):
+
+def haveSimilarSelections(selections1, selections2, threshold=0.5):
+    common_event_count = 0
+
+    for selection1 in selections1:
+        for selection2 in selections2:
+            if selection1['event_id'] == selection2['event_id']:
+                common_event_count += 1
+
+    similarity_percentage = common_event_count / len(selections1)
+
+    # Check if the similarity percentage exceeds the threshold
+    if similarity_percentage >= threshold:
+        return True
+    else:
+        return False
+
+
+def findSimilarCoupons(coupons, coupon_id, threshold=0.5, limit=3):
     G = createGraph(coupons)
 
-    for i, coupon in enumerate(coupons):
-        selections = coupon.get("selections", [])
-        for j in range(len(selections)):
-            event_id = selections[j].get("event_id")
+    if coupon_id in G.nodes:
+        coupon_data = G.nodes[coupon_id]
+        coupon_selections = coupon_data['selections']
 
-            if not G.has_node(event_id):  # Check if node exists in the graph
-                G.add_node(event_id)  # Add event as a node in the graph
+        for node, data in G.nodes(data=True):
+            if node != coupon_id and haveSimilarSelections(coupon_selections, data['selections'], threshold):
+                G.add_edge(coupon_id, node)
+                limit = limit - 1
+            if limit == 0:
+                break
 
-            # Create edges between events from the same coupon
-            for k in range(j + 1, len(selections)):
-                other_event_id = selections[k].get("event_id")
-                if event_id != other_event_id and not G.has_edge(event_id,
-                                                                 other_event_id):  # Check if edge already exists
-                    G.add_edge(event_id, other_event_id)
+    return list(G.neighbors(coupon_id))
 
-            # Create edges between events from different coupons
-            for other_coupon in coupons[i + 1:]:
-                other_selections = other_coupon.get("selections", [])
-                for other_selection in other_selections:
-                    other_event_id = other_selection.get("event_id")
-                    if event_id != other_event_id and not G.has_edge(event_id,
-                                                                     other_event_id):  # Check if edge already exists
-                        G.add_edge(event_id, other_event_id)
-
-    # Perform graph analysis to determine popularity
-    # Calculate degree centrality for each node
-    degree_centrality = nx.degree_centrality(G)
-
-    # Sort events based on degree centrality to find popular ones
-    popular_events = sorted(degree_centrality, key=degree_centrality.get, reverse=True)
-
-    return popular_events
-
-
-def recommend_coupon_from_popular_coupons(events, limit, user):
-    return {
-        'selections': events[:limit],
-        'username': user['username']
-    }

@@ -53,13 +53,13 @@ if __name__ == '__main__':
         )
 
         # Assign the specified partitions to the consumers
-        consumer_of_users012.assign([TopicPartition("coupon", p) for p in partitions012])
-        consumer_of_users345.assign([TopicPartition("coupon", p) for p in partitions345])
-        consumer_of_users6789.assign([TopicPartition("coupon", p) for p in partitions6789])
+        consumer_of_users012.assign([TopicPartition("user", p) for p in partitions012])
+        consumer_of_users345.assign([TopicPartition("user", p) for p in partitions345])
+        consumer_of_users6789.assign([TopicPartition("user", p) for p in partitions6789])
 
         processes.append(multiprocessing.Process(target=save_users, args=(consumer_of_users012,)))
         processes.append(multiprocessing.Process(target=save_users, args=(consumer_of_users345,)))
-        processes.append(multiprocessing.Process(target=save_users(), args=(consumer_of_users6789,)))
+        processes.append(multiprocessing.Process(target=save_users, args=(consumer_of_users6789,)))
 
         # Start the processes
         for process in processes:

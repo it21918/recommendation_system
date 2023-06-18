@@ -45,6 +45,7 @@ coupon_schema = {
                 "required": ["event_id", "odds"]
             }
         },
+        "timestamp": {"type": "string", "format": "date-time"},
         "username": {"type": "string"}
     },
     "required": ["selections", "username"],
@@ -90,6 +91,17 @@ def validate_users_schema(users):
     try:
         for user in users:
             jsonschema.validate(user, user_schema)
+    except jsonschema.ValidationError as err:
+        return False, err.message
+
+    return True, "Schemas are valid"
+
+
+def validate_coupons_schema(coupons):
+    """ function to validate users schema """
+    try:
+        for coupon in coupons:
+            jsonschema.validate(coupon, coupon_schema)
     except jsonschema.ValidationError as err:
         return False, err.message
 

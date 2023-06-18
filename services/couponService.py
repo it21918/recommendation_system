@@ -32,20 +32,23 @@ def createCouponTable():
     conn = DatabaseConnection.get_instance().get_connection()
     cur = conn.cursor()
 
-    # Execute a command: this creates a new table
+    # Execute commands to create the tables
     cur.execute('''CREATE TABLE IF NOT EXISTS coupons (
-                id SERIAL PRIMARY KEY,
-                username varchar(50) NOT NULL REFERENCES users(username) ON DELETE CASCADE
+                    id SERIAL PRIMARY KEY,
+                    timestamp timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+                    username varchar(50) NOT NULL REFERENCES users(username) ON DELETE CASCADE
                 )''')
 
     cur.execute('''CREATE TABLE IF NOT EXISTS selections (
-                coupon_id integer NOT NULL REFERENCES coupons(id) ON DELETE CASCADE,
-                event_id integer NOT NULL REFERENCES events(id) ON DELETE CASCADE,
-                odds float NOT NULL,
-                PRIMARY KEY (coupon_id, event_id));''')
+                    coupon_id integer NOT NULL REFERENCES coupons(id) ON DELETE CASCADE,
+                    event_id integer NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+                    odds float NOT NULL,
+                    PRIMARY KEY (coupon_id, event_id)
+                )''')
 
     conn.commit()
     cur.close()
+
 
 
 def insert_coupon(coupon):
@@ -85,12 +88,35 @@ def get_all_coupons():
     return coupons
 
 
+def get_coupon(coupon_id):
+    """Function to retrieve a specific coupon by coupon_id"""
+    conn = DatabaseConnection.get_instance().get_connection()
+    cur = conn.cursor()
+
+    # Retrieve the coupon from the coupons table
+    cur.execute('SELECT id, username FROM coupons WHERE id = %s;', (coupon_id,))
+    row = cur.fetchone()
+
+    if row is None:
+        return None
+
+    coupon = {"coupon_id": row[0], "username": row[1], "selections": []}
+
+    # Retrieve the selections associated with the coupon
+    cur.execute('SELECT event_id, odds FROM selections WHERE coupon_id = %s;', (coupon_id,))
+    for selection_row in cur.fetchall():
+        coupon["selections"].append({"event_id": selection_row[0], "odds": selection_row[1]})
+
+    cur.close()
+    return coupon
+
+
 def get_all_user_coupons(username):
     conn = DatabaseConnection.get_instance().get_connection()
     cur = conn.cursor()
 
-    # Retrieve the coupons for the given username
-    cur.execute('SELECT id, username FROM coupons WHERE username = %s;', (username,))
+    # Retrieve the coupons for the given username, ordered by timestamp
+    cur.execute('SELECT id, username FROM coupons WHERE username = %s ORDER BY timestamp;', (username,))
     coupons = []
     for row in cur.fetchall():
         coupon = {"coupon_id": row[0], "user_id": row[1], "selections": []}
