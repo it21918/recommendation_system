@@ -28,7 +28,7 @@ def save_users(consumerOfUsers):
             user_count += 1
             if user_count == 50:
                 # Close the database connection after saving 50 users
-                # DatabaseConnection.get_instance().get_connection().close()
+                DatabaseConnection.get_instance().get_connection().close()
                 break
 
 
