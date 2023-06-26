@@ -25,13 +25,14 @@ def recommend_events_based_on_similarity(all_events, user, limit: int = 1):
         selection = {
             'event_id': event['id'],
             'odds': score / 3 * 100,  # Convert the score to a percentage,
-            'timestamp': datetime.datetime.now()
+            'timestamp': datetime.datetime.now().isoformat()
         }
         selections.append(selection)
 
     coupon = {
         'selections': selections,
-        'username': user['username']
+        'username': user['username'],
+        'timestamp': datetime.datetime.now().isoformat()
     }
 
     return coupon
@@ -42,7 +43,7 @@ def recommend_coupons_based_on_friends(friend_coupons, user):
     selections = [select for coupons in friend_coupons for coupon in coupons for select in coupon['selections']]
 
     # Create a new coupon with all the selections and the user's username
-    coupon = {'selections': selections, 'username': user['username']}
+    coupon = {'selections': selections, 'username': user['username'], 'timestamp': datetime.datetime.now().isoformat()}
 
     return coupon
 
@@ -51,7 +52,7 @@ def createGraph(coupons):
     G = nx.Graph()
 
     for coupon in coupons:
-        G.add_node(coupon['coupon_id'], selections=coupon['selections'])
+        G.add_node(coupon['id'], selections=coupon['selections'])
 
     return G
 
@@ -88,4 +89,6 @@ def findSimilarCoupons(coupons, coupon_id, threshold=0.5, limit=3):
                 break
 
     return list(G.neighbors(coupon_id))
+
+
 

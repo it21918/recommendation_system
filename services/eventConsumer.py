@@ -1,5 +1,7 @@
 import json
 import multiprocessing
+
+from flask import jsonify
 from kafka import KafkaConsumer, TopicPartition
 from validator import validate_event_schema
 from eventService import insert_event, DatabaseConnection
@@ -13,8 +15,11 @@ def save_events(consumer):
     global event_count  # Access the global event count variable
     for message in consumer:
         data = json.loads(message.value)
-        print(data)
-        validate_event_schema(data)
+        is_valid, response_message = validate_event_schema(data)
+        if not is_valid:
+            print(response_message)
+            return -1
+
         insert_event(data)
         with event_count_lock:
             event_count += 1

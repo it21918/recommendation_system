@@ -5,6 +5,7 @@ import datetime
 from userService import get_all_users
 from eventService import get_all_events
 
+
 def generate_user():
     """Generates a random user based on the UserSchema."""
     try:
@@ -26,9 +27,9 @@ def generate_user():
             "registration_date": registration_date,
             "friends": friends
         }
-    except:
-        print("error trying again")
-        generate_user()
+    except Exception as e:
+        print(f"Error occurred while generating a user: {str(e)}")
+        return generate_user()
 
 
 def generate_event():
@@ -62,14 +63,14 @@ def generate_coupon(num_events=3):
     events = get_all_events()
 
     user = random.choice(users)
-    selected_events = random.sample(events, num_events)  # Select multiple random events
+    selected_events = random.sample(events, random.randint(1, len(events)))  # Select multiple random events
 
     registration_date = user["registration_date"]
-
+    timestamp = (datetime.datetime.utcnow() + datetime.timedelta(days=random.randint(1, 30))).isoformat()
     coupon = {
         "username": user["username"],
         "selections": [],
-        "created_date": (datetime.datetime.utcnow() + datetime.timedelta(days=random.randint(1, 30))).isoformat()
+        "timestamp": timestamp
     }
 
     for event in selected_events:
@@ -95,4 +96,3 @@ def generate_coupon(num_events=3):
     else:
         print("error trying again")
         return generate_coupon()
-

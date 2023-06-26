@@ -50,7 +50,6 @@ if __name__ == '__main__':
         while True:
             print(str(counter).encode('utf-8'))
             producer.send(topic='user', value=generate_user(), key=str(counter).encode('utf-8'))
-            print(generate_user())
             producer.send(topic='event', value=generate_event(), key=str(counter).encode('utf-8'))
             print(generate_event())
             producer.send(topic='coupon', value=generate_coupon(), key=str(counter).encode('utf-8'))

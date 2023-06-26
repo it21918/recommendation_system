@@ -50,7 +50,6 @@ def createCouponTable():
     cur.close()
 
 
-
 def insert_coupon(coupon):
     conn = DatabaseConnection.get_instance().get_connection()
     cur = conn.cursor()
@@ -75,10 +74,10 @@ def get_all_coupons():
     cur = conn.cursor()
 
     # Retrieve all coupons from the coupons table
-    cur.execute('SELECT id, username FROM coupons;')
+    cur.execute('SELECT id, timestamp, username FROM coupons;')
     coupons = []
     for row in cur.fetchall():
-        coupon = {"coupon_id": row[0], "user_id": row[1], "selections": []}
+        coupon = {"id": row[0], "username": row[2], "selections": [], "timestamp": row[1].strftime("%Y-%m-%dT%H:%M:%S")}
         cur.execute('SELECT event_id, odds FROM selections WHERE coupon_id = %s;', (row[0],))
         for selection_row in cur.fetchall():
             coupon["selections"].append({"event_id": selection_row[0], "odds": selection_row[1]})
@@ -94,13 +93,13 @@ def get_coupon(coupon_id):
     cur = conn.cursor()
 
     # Retrieve the coupon from the coupons table
-    cur.execute('SELECT id, username FROM coupons WHERE id = %s;', (coupon_id,))
+    cur.execute('SELECT id, timestamp, username FROM coupons WHERE id = %s;', (coupon_id,))
     row = cur.fetchone()
 
     if row is None:
         return None
 
-    coupon = {"coupon_id": row[0], "username": row[1], "selections": []}
+    coupon = {"id": row[0], "username": row[2], "selections": [], 'timestamp': row[1].strftime("%Y-%m-%dT%H:%M:%S")}
 
     # Retrieve the selections associated with the coupon
     cur.execute('SELECT event_id, odds FROM selections WHERE coupon_id = %s;', (coupon_id,))
@@ -119,7 +118,7 @@ def get_all_user_coupons(username):
     cur.execute('SELECT id, username FROM coupons WHERE username = %s ORDER BY timestamp;', (username,))
     coupons = []
     for row in cur.fetchall():
-        coupon = {"coupon_id": row[0], "user_id": row[1], "selections": []}
+        coupon = {"id": row[0], "username": row[1], "selections": []}
         cur.execute('SELECT event_id, odds FROM selections WHERE coupon_id = %s;', (row[0],))
         for selection_row in cur.fetchall():
             coupon["selections"].append({"event_id": selection_row[0], "odds": selection_row[1]})

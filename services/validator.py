@@ -27,7 +27,13 @@ event_schema = {
         "sport": {"type": "string"}
     },
     "required": ["begin_timestamp", "country", "end_timestamp", "league", "participants", "sport"],
-    "additionalProperties": False
+    "additionalProperties": {
+        "not": {
+            "properties": {
+                "id": {"type": "integer"}
+            }
+        }
+    }
 }
 
 # JSON schema for CouponSchema
@@ -48,8 +54,7 @@ coupon_schema = {
         "timestamp": {"type": "string", "format": "date-time"},
         "username": {"type": "string"}
     },
-    "required": ["selections", "username"],
-    "additionalProperties": False
+    "required": ["selections", "username", "timestamp"]
 }
 
 

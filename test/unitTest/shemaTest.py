@@ -53,7 +53,8 @@ class TestSchema(unittest.TestCase):
                     "odds": 2.0
                 }
             ],
-            "username": "user123"
+            "username": "user123",
+            "timestamp": "2023-06-26T19:16:06"
         }
 
         self.invalid_coupon = {
@@ -67,7 +68,8 @@ class TestSchema(unittest.TestCase):
                     "odds": "2.0"
                 }
             ],
-            "username": "user123"
+            "username": "user123",
+            "timestamp": "2023-06-26T19:16:06"
         }
 
         self.valid_event = {

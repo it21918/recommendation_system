@@ -1,6 +1,7 @@
 import json
 import multiprocessing
 
+from flask import jsonify
 from kafka import KafkaConsumer, TopicPartition
 from couponService import insert_coupon
 from eventService import DatabaseConnection
@@ -17,9 +18,12 @@ def save_coupons(consumerOfCoupons):
 
     for message in consumerOfCoupons:
         data = json.loads(message.value)
-        validate_coupon_schema(data)
 
-        print(data)
+        is_valid, response_message = validate_coupon_schema(data)
+        if not is_valid:
+            print(response_message)
+            return -1
+
         insert_coupon(data)
 
         with coupon_count_lock:

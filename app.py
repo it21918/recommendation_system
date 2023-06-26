@@ -4,7 +4,8 @@ from recommendation import recommend_events_based_on_similarity, recommend_coupo
 from services.couponService import get_friends_coupons, get_all_coupons, get_coupon, get_all_user_coupons
 from services.eventService import insert_event, get_all_events, get_event
 from services.userService import insert_user, get_user, get_all_users
-from services.validator import validate_user_schema, validate_event_schema, validate_coupon_schema
+from services.validator import validate_user_schema, validate_event_schema, validate_coupon_schema, \
+    validate_users_schema, validate_coupons_schema
 
 app = Flask(__name__)
 
@@ -24,7 +25,8 @@ def get_recommendation_coupon_similarity():
         if user_recent_coupons:
             user_recent_coupon = user_recent_coupons[0]
             all_coupons = get_all_coupons()
-            similar_coupons = findSimilarCoupons(coupons=all_coupons,limit=limit, coupon_id=user_recent_coupon['coupon_id'])
+            similar_coupons = findSimilarCoupons(coupons=all_coupons, limit=limit,
+                                                 coupon_id=user_recent_coupon['id'])
 
             for id in similar_coupons:
                 neighbor_coupons.append(get_coupon(id))
@@ -63,6 +65,10 @@ def get_users():
     try:
         # Query the users collection to retrieve all users
         users = get_all_users()
+        is_valid, message = validate_users_schema(users)
+
+        if not is_valid:
+            return jsonify({'error': message}), 400
 
         # Return the users as a JSON response
         return jsonify({'users': users})
@@ -118,6 +124,10 @@ def get_coupons():
     try:
         # Retrieve the coupons from the database
         coupons = get_all_coupons()
+        is_valid, message = validate_coupons_schema(coupons)
+
+        if not is_valid:
+            return jsonify({'error': message}), 400
 
         # Return the coupons as a JSON response
         return jsonify({'coupons': coupons})

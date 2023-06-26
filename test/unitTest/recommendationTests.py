@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch
-
+from recommendation import createGraph, haveSimilarSelections, findSimilarCoupons
 from recommendation import recommend_events_based_on_similarity, findSimilarCoupons
 from recommendation import recommend_coupons_based_on_friends
 
@@ -75,6 +75,100 @@ class TestRecommendationMethods(unittest.TestCase):
         self.assertIn({'event_id': 2, 'odds': 7}, recommended_coupon['selections'])
         self.assertIn({'event_id': 3, 'odds': 8}, recommended_coupon['selections'])
         self.assertIn({'event_id': 4, 'odds': 9}, recommended_coupon['selections'])
+
+    def test_createGraph(self):
+        coupons = [
+            {
+                "id": 1,
+                "selections": [
+                    {"event_id": 1, "odds": 2.0},
+                    {"event_id": 2, "odds": 1.5}
+                ]
+            },
+            {
+                "id": 2,
+                "selections": [
+                    {"event_id": 2, "odds": 1.5},
+                    {"event_id": 3, "odds": 3.0}
+                ]
+            },
+            {
+                "id": 3,
+                "selections": [
+                    {"event_id": 1, "odds": 2.0},
+                    {"event_id": 3, "odds": 3.0}
+                ]
+            }
+        ]
+
+        G = createGraph(coupons)
+
+        # Check if the graph has the correct number of nodes and edges
+        self.assertEqual(len(G.nodes), 3)
+        self.assertEqual(len(G.edges), 0)
+
+        # Check if the node attributes are correctly set
+        self.assertDictEqual(G.nodes[1], {"selections": [{"event_id": 1, "odds": 2.0}, {"event_id": 2, "odds": 1.5}]})
+        self.assertDictEqual(G.nodes[2], {"selections": [{"event_id": 2, "odds": 1.5}, {"event_id": 3, "odds": 3.0}]})
+        self.assertDictEqual(G.nodes[3], {"selections": [{"event_id": 1, "odds": 2.0}, {"event_id": 3, "odds": 3.0}]})
+
+    def test_haveSimilarSelections(self):
+        selections1 = [
+            {"event_id": 1, "odds": 2.0},
+            {"event_id": 2, "odds": 1.5}
+        ]
+        selections2 = [
+            {"event_id": 2, "odds": 1.5},
+            {"event_id": 3, "odds": 3.0}
+        ]
+        threshold = 0.5
+
+        # Check if the selections are similar
+        self.assertTrue(haveSimilarSelections(selections1, selections2, threshold))
+
+        selections3 = [
+            {"event_id": 5, "odds": 2.0},
+            {"event_id": 3, "odds": 3.0}
+        ]
+
+        # Check if the selections are not similar
+        self.assertFalse(haveSimilarSelections(selections1, selections3, threshold))
+
+    def test_findSimilarCoupons(self):
+        coupons = [
+            {
+                "id": 1,
+                "selections": [
+                    {"event_id": 1, "odds": 2.0},
+                    {"event_id": 2, "odds": 1.5},
+                    {"event_id": 3, "odds": 3.0}
+                ]
+            },
+            {
+                "id": 2,
+                "selections": [
+                    {"event_id": 1, "odds": 2.0},
+                    {"event_id": 2, "odds": 1.5},
+                    {"event_id": 3, "odds": 3.0}
+                ]
+            },
+            {
+                "id": 3,
+                "selections": [
+                    {"event_id": 1, "odds": 2.0},
+                    {"event_id": 5, "odds": 3.0}
+                ]
+            }
+        ]
+
+        coupon_id = 1
+        threshold = 0.5
+        limit = 3
+
+        similar_coupons = findSimilarCoupons(coupons, coupon_id, threshold, limit)
+
+        # Check if the function returns the correct list of similar coupon IDs
+        self.assertEqual(similar_coupons, [2])
 
 
 if __name__ == '__main__':

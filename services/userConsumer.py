@@ -1,6 +1,7 @@
 import json
 import multiprocessing
 
+from flask import jsonify
 from kafka import KafkaConsumer, TopicPartition
 from userService import insert_user
 from eventService import DatabaseConnection
@@ -17,14 +18,17 @@ def save_users(consumerOfUsers):
 
     for message in consumerOfUsers:
         data = json.loads(message.value)
-        print(data)
-        validate_user_schema(data)
+        is_valid, response_message = validate_user_schema(data)
+        if not is_valid:
+            print(response_message)
+            return -1
+
         insert_user(data)
         with user_count_lock:
             user_count += 1
             if user_count == 50:
                 # Close the database connection after saving 50 users
-                DatabaseConnection.get_instance().get_connection().close()
+                # DatabaseConnection.get_instance().get_connection().close()
                 break
 
 

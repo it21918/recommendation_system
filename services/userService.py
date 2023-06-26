@@ -63,7 +63,6 @@ def insert_user(user):
 
     # Insert the user's friends into the friends table
     for friend in user['friends']:
-        print(friend)
         cur.execute('INSERT INTO friends (user_username, friend_username) '
                     'VALUES (%s, %s);', (user['username'], friend))
 
@@ -90,6 +89,10 @@ def get_user(username):
     cur.execute('SELECT * FROM users WHERE username = %s;', (username,))
     row = cur.fetchone()
 
+    # Retrieve the user's friends from the friend table
+    cur.execute('''SELECT friend_username FROM friends WHERE user_username=%s''', (row[0],))
+    friend_rows = cur.fetchall()
+
     if not row:
         cur.close()
         return jsonify({'error': 'User not found'}), 404
@@ -99,9 +102,10 @@ def get_user(username):
         "birth_year": row[1],
         "country": row[2],
         "currency": row[3],
-        "registration_date": row[4],
-        "friends": []
+        "registration_date": row[4].strftime("%Y-%m-%dT%H:%M:%S"),
+        "friends": friend_rows
     }
+
     cur.close()
     return user
 
@@ -121,7 +125,7 @@ def get_all_users():
             "birth_year": row[1],
             "country": row[2],
             "currency": row[3],
-            "registration_date": row[4],
+            "registration_date": row[4].strftime("%Y-%m-%dT%H:%M:%S"),
             "friends": []
         }
 

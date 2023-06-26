@@ -98,11 +98,19 @@ def get_event(id):
 
     # Retrieve the user with the given username from the user table
     cur.execute('SELECT * FROM events WHERE id = %s;', (id,))
-    user = cur.fetchone()
-
+    row = cur.fetchone()
+    event = {
+        "id": row[0],
+        "begin_timestamp": row[1].strftime("%Y-%m-%dT%H:%M:%S"),
+        "country": row[2],
+        "end_timestamp": row[3].strftime("%Y-%m-%dT%H:%M:%S"),
+        "league": row[4],
+        "sport": row[5],
+        "participants": []
+    }
     cur.close()
 
-    return user
+    return event
 
 
 def get_all_events():
@@ -118,9 +126,9 @@ def get_all_events():
         # Create an event dictionary with the event data
         event = {
             "id": row[0],
-            "begin_timestamp": row[1],
+            "begin_timestamp": row[1].strftime("%Y-%m-%dT%H:%M:%S"),
             "country": row[2],
-            "end_timestamp": row[3],
+            "end_timestamp": row[3].strftime("%Y-%m-%dT%H:%M:%S"),
             "league": row[4],
             "sport": row[5],
             "participants": []
